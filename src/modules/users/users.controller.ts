@@ -3,10 +3,17 @@ import {
   Controller,
   Delete,
   Get,
+  Ip,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { User } from 'src/common/decorators/user.decorator';
+import { AuthorizationGuard } from 'src/common/guards/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
@@ -21,7 +28,14 @@ export class UsersController {
   }
 
   @Get()
-  async findAll() {
+  @Roles('admin', 'moderator')
+  @UseGuards(AuthorizationGuard)
+  async findAll(
+    @Ip() ip: any,
+    @User() user: any,
+    @Query('id', new ParseIntPipe({ optional: true })) id?: number,
+  ) {
+    console.log({ id, ip, user });
     return await this.usersService.findAll();
   }
 
